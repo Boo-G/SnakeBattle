@@ -93,16 +93,24 @@ def move(game_state: typing.Dict) -> typing.Dict:
     elif my_head["y"] == board_height - 1:
         is_move_safe["up"] = False
 
-    # TODO: Step 2 - Prevent your Battlesnake from colliding with itself
-    my_body = game_state['you']['body'] # Example: [{"x": 0, "y": 0}, ..., {"x": 2, "y": 0}]
+    #Step 2 - Prevent your Battlesnake from colliding with itself
+        
+    # technically pointless as its done in step 3
+    my_body = game_state['you']['body'] # Example for body: [{"x": 0, "y": 0}, ..., {"x": 2, "y": 0}]
 
     for move in is_move_safe.keys():
         if findCoordinate(my_head,move) in my_body[1:]:
                 is_move_safe[move] = False
 
 
-    # TODO: Step 3 - Prevent your Battlesnake from colliding with other Battlesnakes
-    # opponents = game_state['board']['snakes']
+    #Step 3 - Prevent your Battlesnake from colliding with other Battlesnakes
+    opponents = game_state['board']['snakes']
+
+    for opponet in opponents:
+        for move in is_move_safe.keys():
+            if findCoordinate(my_head,move) in opponet["body"]:
+                    is_move_safe[move] = False
+
 
     # Are there any safe moves left?
     safe_moves = []
