@@ -52,6 +52,19 @@ def findNextMovePosition(my_head, move):
 
   elif move == "down":
     return {"x": my_head["x"], "y": my_head["y"] - 1}
+  
+def findNextNextMovePosition(my_head, move):
+  if move == "right":
+    return {"x": my_head["x"] + 2, "y": my_head["y"]}
+
+  elif move == "left":
+    return {"x": my_head["x"] - 2, "y": my_head["y"]}
+
+  elif move == "up":
+    return {"x": my_head["x"], "y": my_head["y"] + 2}
+
+  elif move == "down":
+    return {"x": my_head["x"], "y": my_head["y"] - 2}
 
 
 # find the distance between the start and end
@@ -77,14 +90,18 @@ def myMove(safe_moves, my_head, closeFood):
   distance = 100
   finalMove = ""
   for move in safe_moves:
-    print("within my move", findNextMovePosition(my_head, move), closeFood)
     if findDistance(findNextMovePosition(my_head, move), closeFood) < distance:
-
       distance = findDistance(findNextMovePosition(my_head, move), closeFood)
       finalMove = move
 
   return finalMove
 
+
+def opponentSnakes(opponents,is_move_safe,my_head):
+  for opponet in opponents:
+    for move in is_move_safe.keys():
+      if findNextMovePosition(my_head, move) in opponet["body"]:
+        is_move_safe[move] = False
 
 # move is called on every turn and returns your next move
 # Valid moves are "up", "down", "left", or "right"
@@ -94,8 +111,7 @@ def move(game_state: typing.Dict) -> typing.Dict:
   is_move_safe = {"up": True, "down": True, "left": True, "right": True}
 
   # We've included code to prevent your Battlesnake from moving backwards
-  my_head = game_state["you"]["body"][
-      0]  # Coordinates of your head {"x": 0, "y": 0}
+  my_head = game_state["you"]["body"][0]  # Coordinates of your head {"x": 0, "y": 0}
   my_neck = game_state["you"]["body"][1]  # Coordinates of your "neck"
 
   if my_neck["x"] < my_head["x"]:  # Neck is left of head, don't move left
@@ -110,7 +126,7 @@ def move(game_state: typing.Dict) -> typing.Dict:
   elif my_neck["y"] > my_head["y"]:  # Neck is above head, don't move up
     is_move_safe["up"] = False
 
-  # TODO: Step 1 - Prevent your Battlesnake from moving out of bounds
+  #Step 1 - Prevent your Battlesnake from moving out of bounds
   board_width = game_state['board']['width']
   board_height = game_state['board']['height']
 
@@ -126,28 +142,17 @@ def move(game_state: typing.Dict) -> typing.Dict:
   elif my_head["y"] == board_height - 1:
     is_move_safe["up"] = False
 
-  # Step 2 - Prevent your Battlesnake from colliding with itself
 
-  # technically pointless as its done in step 3
-  my_body = game_state['you'][
-      'body']  # Example for body: [{"x": 0, "y": 0}, ..., {"x": 2, "y": 0}]
 
-  for move in is_move_safe.keys():
-    if findNextMovePosition(my_head, move) in my_body[1:]:
-      is_move_safe[move] = False
-
-  # Step 3 - Prevent your Battlesnake from colliding with other Battlesnakes
+  # Step 2/3 - Prevent your Battlesnake from colliding with other Battlesnakes
   opponents = game_state['board']['snakes']
 
-  for opponet in opponents:
-    for move in is_move_safe.keys():
-      if findNextMovePosition(my_head, move) in opponet["body"]:
-        is_move_safe[move] = False
+  opponentSnakes(opponents,is_move_safe,my_head)
+
 
   # Are there any safe moves left?
   safe_moves = []
-  for move, isSafe in is_move_safe.items(
-  ):  # [4,3,2,1]  enumerate move = 0, isSafe = 4
+  for move, isSafe in is_move_safe.items():  # [4,3,2,1]  enumerate move = 0, isSafe = 4
     if isSafe:
       safe_moves.append(move)
 
