@@ -12,6 +12,7 @@
 
 import random
 import typing
+from collections import Counter
 
 
 # info is called when you create your Battlesnake on play.battlesnake.com
@@ -98,10 +99,33 @@ def myMove(safe_moves, my_head, closeFood):
 
 
 def opponentSnakes(opponents,is_move_safe,my_head):
+  theFuture = {"up": True, "down": True, "left": True, "right": True}
+  trueCounter = 0
   for opponet in opponents:
     for move in is_move_safe.keys():
-      if findNextMovePosition(my_head, move) in opponet["body"]:
-        is_move_safe[move] = False
+        if findNextMovePosition(my_head, move) in opponet["body"]:
+            is_move_safe[move] = False
+        # for all true options, check if the next run has more than one true option
+        else:
+            print(Counter(is_move_safe.values()))
+            if Counter(is_move_safe.values())["True"] > 1:
+                for futureMove in theFuture.keys():
+                    if findNextNextMovePosition(my_head, move) in opponet["body"]:
+                        theFuture[futureMove] = False
+
+                    else:
+                        theFuture[futureMove] = True
+                        trueCounter += 1
+
+                # if the next option doesnt have more than one way out return false
+                if not(trueCounter >= 2):
+                    is_move_safe[move] = False
+                theFuture = {"up": True, "down": True, "left": True, "right": True}
+                trueCounter = 0
+        
+              
+            
+          
 
 # move is called on every turn and returns your next move
 # Valid moves are "up", "down", "left", or "right"
